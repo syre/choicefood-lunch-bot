@@ -11,10 +11,18 @@ import lunch_scraper
 
 app = Flask(__name__)
 
-@app.route("/lunch")
+@app.route("/lunch", methods=["GET", "POST"])
 def get_lunch():
 	output = lunch_scraper.get_menu_output()
-	return jsonify({"response_type": "in_channel", "text": output})
+	return jsonify(
+		{
+			"response_type": "in_channel",
+			"text": "Todays lunch menu is:",
+			"attachments": [
+				"text": output
+			]
+		}
+	)
 
 
 if __name__ == '__main__':
