@@ -5,6 +5,7 @@ from datetime import datetime
 import re
 import subprocess
 import tempfile
+import shutil
 
 import requests
 import bs4
@@ -29,27 +30,40 @@ response = requests.get(MENU_URL)
 
 soup = bs4.BeautifulSoup(response.text, "html.parser")
 
-WEEK_PATTERN = "Uge {}".format(NOW.isocalendar()[1])
+WEEK_PATTERN = "Uge {}"
+
+# If it's friday make the end index "velbekomme"
+if NOW.weekday() == 4:
+    WEEK_PATTERN = WEEK_PATTERN.format(NOW.isocalendar()[1])
+    START_INDEX = WEEKDAY_DICT[NOW.weekday()]
+    END_INDEX = "velbekomme"
+# If it's weekend let's take mondays menu
+if NOW.weekday() > 4:
+    WEEK_PATTERN = WEEK_PATTERN.format(NOW.isocalendar()[1]+1)
+    START_INDEX = WEEKDAY_DICT[0]
+    END_INDEX = WEEKDAY_DICT[1]
+else:
+    WEEK_PATTERN = WEEK_PATTERN.format(NOW.isocalendar()[1])
+    START_INDEX = WEEKDAY_DICT[NOW.weekday()]
+    END_INDEX = WEEKDAY_DICT[NOW.weekday()+1]
 
 def get_menu_output():
     # Grab current weeks PDF menu.
-    for elem in soup(text=re.compile(WEEK_PATTERN)):
-        pdf_url = "{}{}".format(ROOT_URL, elem.parent.parent.a["href"])
+    elem = soup.find("strong", text=re.compile(WEEK_PATTERN))
+    pdf_url = "{}{}".format(ROOT_URL, elem.parent.parent.a["href"])
 
     response = requests.get(pdf_url, stream=True)
-
     # Save the menu to a file and run pdftotext on it.
     with tempfile.NamedTemporaryFile() as file:
-        for chunk in response.iter_content(chunk_size=128):
-            file.write(chunk)
+        response.raw.decode_content = True
+        shutil.copyfileobj(response.raw, file)
         output = subprocess.check_output(["pdftotext", file.name, "-"]).lower().decode("utf-8")
 
-    # TODAYS_WEEKDAY = WEEKDAY_DICT[NOW.weekday()]
-    # TOMORROWS_WEEKDAY = WEEKDAY_DICT[NOW.weekday()+1]
-    TODAYS_WEEKDAY = "tirsdag"
-    TOMORROWS_WEEKDAY = "onsdag"
-    RE_STRING = r"({}.*?){}".format(TODAYS_WEEKDAY, TOMORROWS_WEEKDAY)
+    RE_STRING = r"({}.*?){}".format(START_INDEX, END_INDEX)
 
     regex_object = re.compile(RE_STRING, re.DOTALL)
     menu_output = re.search(regex_object, output).group(1)
     return menu_output
+
+if __name__ == '__main__':
+    print(get_menu_output())
