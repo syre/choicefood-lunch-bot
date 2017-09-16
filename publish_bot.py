@@ -18,12 +18,9 @@ def get_lunch():
 		{
 			"response_type": "in_channel",
 			"text": "Todays lunch menu is:",
-			"attachments": [
-				"text": output
-			]
+			"attachments": [{"text": output}]
 		}
 	)
-
 
 if __name__ == '__main__':
 	app.run(host="0.0.0.0", port=5050)
