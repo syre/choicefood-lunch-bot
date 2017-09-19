@@ -24,10 +24,9 @@ MENU_URL = "http://www.dg-mad.dk/Frokostordning/Menuoversigt.html"
 
 ROOT_URL = "http://www.dg-mad.dk"
 
-
-WEEK_PATTERN = "Uge {}"
-
 def get_menu_output():
+    week_pattern = "Uge {}"
+
     response = requests.get(MENU_URL)
 
     soup = bs4.BeautifulSoup(response.text, "html.parser")
@@ -36,21 +35,21 @@ def get_menu_output():
 
     # If it's friday make the end index "velbekomme"
     if NOW.weekday() == 4:
-        WEEK_PATTERN = WEEK_PATTERN.format(NOW.isocalendar()[1])
+        week_pattern = week_pattern.format(NOW.isocalendar()[1])
         START_INDEX = WEEKDAY_DICT[NOW.weekday()]
         END_INDEX = "velbekomme"
     # If it's weekend let's take mondays menu
     if NOW.weekday() > 4:
-        WEEK_PATTERN = WEEK_PATTERN.format(NOW.isocalendar()[1]+1)
+        week_pattern = week_pattern.format(NOW.isocalendar()[1]+1)
         START_INDEX = WEEKDAY_DICT[0]
         END_INDEX = WEEKDAY_DICT[1]
     else:
-        WEEK_PATTERN = WEEK_PATTERN.format(NOW.isocalendar()[1])
+        week_pattern = week_pattern.format(NOW.isocalendar()[1])
         START_INDEX = WEEKDAY_DICT[NOW.weekday()]
         END_INDEX = WEEKDAY_DICT[NOW.weekday()+1]
 
     # Grab current weeks PDF menu.
-    elem = soup.find("strong", text=re.compile(WEEK_PATTERN))
+    elem = soup.find("strong", text=re.compile(week_pattern))
     pdf_url = "{}{}".format(ROOT_URL, elem.parent.parent.a["href"])
 
     response = requests.get(pdf_url, stream=True)
