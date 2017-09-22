@@ -24,6 +24,7 @@ MENU_URL = "http://www.dg-mad.dk/Frokostordning/Menuoversigt.html"
 
 ROOT_URL = "http://www.dg-mad.dk"
 
+
 def get_week_pattern():
     week_pattern = "Uge {}"
     now = datetime.now()
@@ -33,6 +34,7 @@ def get_week_pattern():
     else:
         week_pattern = week_pattern.format(now.isocalendar()[1])
     return week_pattern
+
 
 def get_pdf_indexes():
     now = datetime.now()
@@ -46,11 +48,12 @@ def get_pdf_indexes():
         end_index = WEEKDAY_DICT[1]
     else:
         start_index = WEEKDAY_DICT[now.weekday()]
-        end_index = WEEKDAY_DICT[now.weekday()+1]    
+        end_index = WEEKDAY_DICT[now.weekday()+1]
     return start_index, end_index
 
+
 def extract_pdf_output():
-    week_pattern = get_week_pattern()    
+    week_pattern = get_week_pattern()
 
     response = requests.get(MENU_URL)
 
@@ -68,15 +71,17 @@ def extract_pdf_output():
         output = subprocess.check_output(["pdftotext", file.name, "-"]).lower().decode("utf-8")
     return output
 
+
 def get_menu_output():
     output = extract_pdf_output()
     start_index, end_index = get_pdf_indexes()
 
-    RE_STRING = r"({}.*?){}".format(start_index, end_index)
+    index_regex = r"({}.*?){}".format(start_index, end_index)
 
-    regex_object = re.compile(RE_STRING, re.DOTALL)
-    menu_output = re.search(regex_object, output).group(1)
+    index_object = re.compile(index_regex, re.DOTALL)
+    menu_output = re.search(index_object, output).group(1)
     return menu_output
+
 
 if __name__ == '__main__':
     print(get_menu_output())
