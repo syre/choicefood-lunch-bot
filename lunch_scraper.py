@@ -41,7 +41,7 @@ def get_pdf_indexes():
         start_index = WEEKDAY_DICT[now.weekday()]
         end_index = "velbekomme"
     # If it's weekend let's take mondays menu.
-    if now.weekday() > 4:
+    elif now.weekday() > 4:
         start_index = WEEKDAY_DICT[0]
         end_index = WEEKDAY_DICT[1]
     else:
@@ -71,7 +71,7 @@ def extract_pdf_output():
 def get_menu_output():
     output = extract_pdf_output()
     start_index, end_index = get_pdf_indexes()
-   
+
     RE_STRING = r"({}.*?){}".format(start_index, end_index)
 
     regex_object = re.compile(RE_STRING, re.DOTALL)
