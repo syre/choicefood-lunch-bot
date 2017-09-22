@@ -58,7 +58,7 @@ def extract_pdf_output():
 
     # Grab current weeks PDF menu.
     elem = soup.find("strong", text=re.compile(week_pattern))
-    pdf_url = "{}{}".format(ROOT_URL, elem.parent.parent.a["href"])
+    pdf_url = "{}{}".format(ROOT_URL, elem.parent.a["href"])
 
     response = requests.get(pdf_url, stream=True)
     # Save the menu to a file and run pdftotext on it.
