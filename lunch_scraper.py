@@ -68,6 +68,12 @@ def extract_pdf_output():
         output = subprocess.check_output(["pdftotext", file.name, "-"]).lower().decode("utf-8")
     return output
 
+def add_formatting(output):
+    output = output.replace("\n","\n\n")
+    output = output.replace("•", "-")
+    return output
+
+
 def get_menu_output():
     output = extract_pdf_output()
     start_index, end_index = get_pdf_indexes()
@@ -76,6 +82,7 @@ def get_menu_output():
 
     regex_object = re.compile(RE_STRING, re.DOTALL)
     menu_output = re.search(regex_object, output).group(1)
+    menu_output = add_formatting(menu_output)
     return menu_output
 
 if __name__ == '__main__':
