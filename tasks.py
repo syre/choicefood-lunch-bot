@@ -15,6 +15,10 @@ Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
+def echo_response(message):
+    if message["type"] == "message":
+        ReplyToActivity(fill=message, text=message["text"]).send()
+
 def fetch_lunch_response(message):
 	menu_output = lunch_scraper.get_menu_output()
 	lunch_string = "**Today's Menu**\n\n{}".format(menu_output)
