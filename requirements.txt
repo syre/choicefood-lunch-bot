@@ -2,3 +2,4 @@ beautifulsoup4==4.6.0
 requests==2.18.4
 microsoftbotframework==0.3.0
 SQLAlchemy==1.2.0b3
+uwsgi==2.0.15
