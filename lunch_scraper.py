@@ -58,6 +58,8 @@ def extract_pdf_output():
 
     # Grab current weeks PDF menu.
     elem = soup.find("strong", text=re.compile(week_pattern))
+    if not elem:
+        elem = soup.find(text=re.compile(week_pattern)).find_next_sibling()
     pdf_url = "{}{}".format(ROOT_URL, elem.parent.a["href"])
 
     response = requests.get(pdf_url, stream=True)
