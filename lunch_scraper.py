@@ -4,8 +4,7 @@
 from datetime import datetime
 import re
 import subprocess
-import tempfile
-import shutil
+import os
 
 import requests
 import bs4
@@ -24,6 +23,7 @@ MENU_URL = "http://www.dg-mad.dk/Frokostordning/Menuoversigt.html"
 
 ROOT_URL = "http://www.dg-mad.dk"
 
+
 def get_week_pattern():
     week_pattern = "Uge {}"
     now = datetime.now()
@@ -33,6 +33,7 @@ def get_week_pattern():
     else:
         week_pattern = week_pattern.format(now.isocalendar()[1])
     return week_pattern
+
 
 def get_pdf_indexes():
     now = datetime.now()
@@ -46,11 +47,12 @@ def get_pdf_indexes():
         end_index = WEEKDAY_DICT[1]
     else:
         start_index = WEEKDAY_DICT[now.weekday()]
-        end_index = WEEKDAY_DICT[now.weekday()+1]    
+        end_index = WEEKDAY_DICT[now.weekday()+1]
     return start_index, end_index
 
+
 def extract_pdf_output():
-    week_pattern = get_week_pattern()    
+    week_pattern = get_week_pattern()
 
     response = requests.get(MENU_URL)
 
@@ -64,14 +66,37 @@ def extract_pdf_output():
 
     response = requests.get(pdf_url, stream=True)
     # Save the menu to a file and run pdftotext on it.
-    with tempfile.NamedTemporaryFile() as file:
-        response.raw.decode_content = True
-        shutil.copyfileobj(response.raw, file)
-        output = subprocess.check_output(["pdftotext", file.name, "-"]).lower().decode("utf-8")
+    if response.status_code != 200:
+        raise RuntimeError(
+            "unsuccessful response for getting the menu: {}".format(
+                response.status_code
+            )
+        )
+    filename = "menu.pdf"
+    with open(filename, "wb") as file:
+        for chunk in response.iter_content(chunk_size=1024):
+            if chunk:
+                file.write(chunk)
+    try:
+        output = subprocess.check_output(
+            ["pdftotext", filename, "-"]
+        ).lower().decode("utf-8")
+    except subprocess.CalledProcessError as exception:
+        raise RuntimeError(
+            "command '{}' return with error (code {}): {}".format(
+                exception.cmd,
+                exception.returncode,
+                exception.output
+            )
+        )
+    finally:
+        os.remove(filename)
+
     return output
 
+
 def add_formatting(output):
-    output = output.replace("\n","\n\n")
+    output = output.replace("\n", "\n\n")
     output = output.replace("•", "-")
     return output
 
@@ -80,12 +105,13 @@ def get_menu_output():
     output = extract_pdf_output()
     start_index, end_index = get_pdf_indexes()
 
-    RE_STRING = r"({}.*?){}".format(start_index, end_index)
+    regex_string = r"({}.*?){}".format(start_index, end_index)
 
-    regex_object = re.compile(RE_STRING, re.DOTALL)
+    regex_object = re.compile(regex_string, re.DOTALL)
     menu_output = re.search(regex_object, output).group(1)
     menu_output = add_formatting(menu_output)
     return menu_output
+
 
 if __name__ == '__main__':
     print(get_menu_output())
