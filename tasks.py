@@ -17,6 +17,7 @@ session = Session()
 
 def echo_response(message):
     if message["type"] == "message":
+        print(message)
         ReplyToActivity(fill=message, text=message["text"]).send()
 
 def fetch_lunch_response(message):
