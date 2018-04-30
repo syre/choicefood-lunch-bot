@@ -5,27 +5,47 @@ from datetime import datetime
 import re
 import subprocess
 import os
+import base64
+
 import googleapiclient
 import requests
 import bs4
 
-WEEKDAY_DICT = {
-    0: "mandag",
-    1: "tirsdag",
-    2: "onsdag",
-    3: "torsdag",
-    4: "fredag",
-    5: "lørdag",
-    6: "søndag"
+from apiclient.discovery import build
+from httplib2 import Http
+from oauth2client import file, client, tools
+
+# Setup the Gmail API
+SCOPES = 'https://www.googleapis.com/auth/gmail.readonly'
+STORE = file.Storage('credentials.json')
+CREDS = STORE.get()
+if not CREDS or CREDS.invalid:
+    FLOW = client.flow_from_clientsecrets('client_secret.json', SCOPES)
+    CREDS = tools.run_flow(FLOW, STORE)
+
+SERVICE = build('gmail', 'v1', http=CREDS.authorize(Http()))
+
+"""
+Menu setup is like this:
+
+Monday    Tuesday
+Wednesday Thursday
+Friday
+
+"""
+WEEKDAY_MENU_INDEXES_DICT = {
+    0: ("mandag", "onsdag"),
+    1: ("tirsdag", "torsdag"),
+    2: ("onsdag", "fredag"),
+    # Thursday is last in column 2 so end index is the right column footer.
+    3: ("torsdag", "velbekomme"),
+    # Friday is last in column 1 so end index is the left column footer.
+    4: ("fredag", "www.choicefood.dk")
 }
-
-MENU_URL = "http://www.dg-mad.dk/Frokostordning/Menuoversigt.html"
-
-ROOT_URL = "http://www.dg-mad.dk"
 
 
 def get_week_pattern():
-    week_pattern = "Uge {}"
+    week_pattern = "uge {}"
     now = datetime.now()
     # If it's weekend, get next week.
     if now.weekday() > 4:
@@ -35,53 +55,65 @@ def get_week_pattern():
     return week_pattern
 
 
-def get_pdf_indexes():
-    now = datetime.now()
-    # If it's friday make the end index "velbekomme".
-    if now.weekday() == 4:
-        start_index = WEEKDAY_DICT[now.weekday()]
-        end_index = "velbekomme"
+def get_pdf_indexes(weekday):
+    # Get column.
+    column_index = 0 if weekday % 2 == 0 else 1
     # If it's weekend let's take mondays menu.
-    elif now.weekday() > 4:
-        start_index = WEEKDAY_DICT[0]
-        end_index = WEEKDAY_DICT[1]
+    if weekday > 4:
+        return column_index, (*WEEKDAY_MENU_INDEXES_DICT[0])
     else:
-        start_index = WEEKDAY_DICT[now.weekday()]
-        end_index = WEEKDAY_DICT[now.weekday()+1]
-    return start_index, end_index
+        return column_index, (*WEEKDAY_MENU_INDEXES_DICT[weekday])
 
+def extract_link_from_message_body(body):
+    week_pattern = get_week_pattern()
+    soup = bs4.BeautifulSoup(body, "html.parser")
+    element = soup.find("a", text=re.compile(week_pattern))
+    if element:
+        return element["href"]
+    return None
 
-def get_emails():
+def get_lunch_message_bodies():
     """
-    SCOPES = 'https://www.googleapis.com/auth/gmail.readonly'
-    store = file.Storage('credentials.json')
-    creds = store.get()
-    if not creds or creds.invalid:
-        flow = client.flow_from_clientsecrets('client_secret.json', SCOPES)
-        creds = tools.run_flow(flow, store)
-    service = build('gmail', 'v1', http=creds.authorize(Http()))
-
+    Retrieve message bodies from Gmail with lunch bot label.
     """
-    # client secret icGoKFxoerjEV-GOl3qsCHbZ
-    # client id 60930985587-tjl4soqpjl1qqe5ideet1shooik4lp55.apps.googleusercontent.com
-    gmail_service = build('gmail', 'v1', developerKey=api_key)
-    print(gmail_service.users.settings.getImap("me"))
-
-
-def extract_pdf_output():
     week_pattern = get_week_pattern()
 
-    response = requests.get(MENU_URL)
+    label_name = "SaxoLunchBot"
 
-    soup = bs4.BeautifulSoup(response.text, "html.parser")
+    label_results = SERVICE.users().labels().list(userId='me').execute()
+    labels = [label for label in label_results["labels"] if label["name"] == label_name]
+    if not labels:
+        raise Exception("Lunch Bot label could not be found")
+    label = labels[0]
+    # Get all messages with lunch bot label.
+    messages_results = SERVICE.users().messages().list(
+        userId="me",
+        labelIds=[label["id"]],
+        q="Frokostmenu {}".format(week_pattern)
+    ).execute()
+    # For each message get the body.
+    message_bodies = []
+    for message in messages_results["messages"]:
+        message_result = SERVICE.users().messages().get(userId="me", id=message["id"], metadataHeaders=["body"]).execute()
+        html_parts = [part for part in message_result["payload"]["parts"] if part["mimeType"] == "text/html"]
+        email_body = base64.urlsafe_b64decode(html_parts[0]["body"]["data"])
+        message_bodies.append(email_body)
+    return message_bodies
 
-    # Grab current weeks PDF menu.
-    elem = soup.find("strong", text=re.compile(week_pattern))
-    if not elem:
-        elem = soup.find(text=re.compile(week_pattern)).find_next_sibling()
-    pdf_url = "{}{}".format(ROOT_URL, elem.parent.a["href"])
+def extract_pdf_output(weekday):
+    # Grab current weeks PDF menu link.
+    message_bodies = get_lunch_message_bodies()
+    menu_link = None
+    for body in message_bodies:
+        link = extract_link_from_message_body(body)
+        if link:
+            menu_link = link
+        break
+    if not menu_link:
+        raise Exception("Lunch menu link could not be found")
+    print(menu_link)
 
-    response = requests.get(pdf_url, stream=True)
+    response = requests.get(menu_link, stream=True)
     # Save the menu to a file and run pdftotext on it.
     if response.status_code != 200:
         raise RuntimeError(
@@ -95,8 +127,11 @@ def extract_pdf_output():
             if chunk:
                 file.write(chunk)
     try:
-        output = subprocess.check_output(
-            ["pdftotext", filename, "-"]
+        left_column_output = subprocess.check_output(
+            ["pdftotext", "-layout", "-x", "0", "-y", "110", "-W", "300", "-H", "1000", filename, "-"]
+        ).lower().decode("utf-8")
+        right_column_output = subprocess.check_output(
+            ["pdftotext", "-layout", "-x","300", "-y", "110", "-W", "300", "-H", "1000", filename, "-"]
         ).lower().decode("utf-8")
     except subprocess.CalledProcessError as exception:
         raise RuntimeError(
@@ -109,26 +144,20 @@ def extract_pdf_output():
     finally:
         os.remove(filename)
 
-    return output
-
-
-def add_formatting(output):
-    output = output.replace("\n", "\n\n")
-    output = output.replace("•", "-")
-    return output
+    return (left_column_output, right_column_output)
 
 
 def get_menu_output():
-    output = extract_pdf_output()
-    start_index, end_index = get_pdf_indexes()
-
+    weekday = 4
+    column_tuple = extract_pdf_output(weekday)
+    column_index, start_index, end_index = get_pdf_indexes(weekday)
     regex_string = r"({}.*?){}".format(start_index, end_index)
 
     regex_object = re.compile(regex_string, re.DOTALL)
-    menu_output = re.search(regex_object, output).group(1)
-    menu_output = add_formatting(menu_output)
+    menu_output = re.search(regex_object, column_tuple[column_index]).group(1)
     return menu_output
 
 
 if __name__ == '__main__':
-    print(get_emails())
+    print(get_menu_output())
+
