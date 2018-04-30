@@ -111,7 +111,6 @@ def extract_pdf_output(weekday):
         break
     if not menu_link:
         raise Exception("Lunch menu link could not be found")
-    print(menu_link)
 
     response = requests.get(menu_link, stream=True)
     # Save the menu to a file and run pdftotext on it.
@@ -148,7 +147,7 @@ def extract_pdf_output(weekday):
 
 
 def get_menu_output():
-    weekday = 4
+    weekday = datetime.now().weekday()
     column_tuple = extract_pdf_output(weekday)
     column_index, start_index, end_index = get_pdf_indexes(weekday)
     regex_string = r"({}.*?){}".format(start_index, end_index)
