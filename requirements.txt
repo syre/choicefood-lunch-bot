@@ -3,3 +3,4 @@ requests==2.18.4
 microsoftbotframework==0.3.0
 SQLAlchemy==1.2.0b3
 uwsgi==2.0.15
+google-api-python-client==1.6.7
