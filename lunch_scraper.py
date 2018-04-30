@@ -145,6 +145,10 @@ def extract_pdf_output(weekday):
 
     return (left_column_output, right_column_output)
 
+def add_formatting(output):
+    output = output.replace("\n", "\n\n")
+    output = output.replace("•", "-")
+    return output
 
 def get_menu_output():
     weekday = datetime.now().weekday()
@@ -154,6 +158,7 @@ def get_menu_output():
 
     regex_object = re.compile(regex_string, re.DOTALL)
     menu_output = re.search(regex_object, column_tuple[column_index]).group(1)
+    menu_output = add_formatting(menu_output)
     return menu_output
 
 
