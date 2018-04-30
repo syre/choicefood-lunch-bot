@@ -5,7 +5,7 @@ from datetime import datetime
 import re
 import subprocess
 import os
-
+import googleapiclient
 import requests
 import bs4
 
@@ -49,6 +49,23 @@ def get_pdf_indexes():
         start_index = WEEKDAY_DICT[now.weekday()]
         end_index = WEEKDAY_DICT[now.weekday()+1]
     return start_index, end_index
+
+
+def get_emails():
+    """
+    SCOPES = 'https://www.googleapis.com/auth/gmail.readonly'
+    store = file.Storage('credentials.json')
+    creds = store.get()
+    if not creds or creds.invalid:
+        flow = client.flow_from_clientsecrets('client_secret.json', SCOPES)
+        creds = tools.run_flow(flow, store)
+    service = build('gmail', 'v1', http=creds.authorize(Http()))
+
+    """
+    # client secret icGoKFxoerjEV-GOl3qsCHbZ
+    # client id 60930985587-tjl4soqpjl1qqe5ideet1shooik4lp55.apps.googleusercontent.com
+    gmail_service = build('gmail', 'v1', developerKey=api_key)
+    print(gmail_service.users.settings.getImap("me"))
 
 
 def extract_pdf_output():
@@ -114,4 +131,4 @@ def get_menu_output():
 
 
 if __name__ == '__main__':
-    print(get_menu_output())
+    print(get_emails())
