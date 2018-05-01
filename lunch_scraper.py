@@ -146,8 +146,8 @@ def extract_pdf_output(weekday):
     return (left_column_output, right_column_output)
 
 def add_formatting(output):
-    output = output.replace("\n", "\n\n")
-    output = output.replace("•", "-")
+    output = re.sub(r"\n{1,}", "\n\n", output)
+    output = re.sub(r" {2}", "&nbsp;", output)
     return output
 
 def get_menu_output():
