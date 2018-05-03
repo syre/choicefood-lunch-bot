@@ -20,7 +20,11 @@ SCOPES = 'https://www.googleapis.com/auth/gmail.readonly'
 STORE = file.Storage('credentials.json')
 CREDS = STORE.get()
 if not CREDS or CREDS.invalid:
-    FLOW = client.flow_from_clientsecrets('client_secret.json', SCOPES)
+    secret_path = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        'client_secret.json'
+    )
+    FLOW = client.flow_from_clientsecrets(secret_path, SCOPES)
     CREDS = tools.run_flow(FLOW, STORE)
 
 SERVICE = build('gmail', 'v1', http=CREDS.authorize(Http()))
