@@ -17,7 +17,12 @@ from oauth2client import file, client, tools
 
 # Setup the Gmail API
 SCOPES = 'https://www.googleapis.com/auth/gmail.readonly'
-STORE = file.Storage('credentials.json')
+STORE = file.Storage(
+        os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            'credentials.json'
+        )
+)
 CREDS = STORE.get()
 if not CREDS or CREDS.invalid:
     secret_path = os.path.join(
