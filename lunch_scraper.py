@@ -136,10 +136,10 @@ def extract_pdf_output(weekday):
                 file.write(chunk)
     try:
         left_column_output = subprocess.check_output(
-            ["pdftotext", "-layout", "-x", "0", "-y", "110", "-W", "300", "-H", "1000", filename, "-"]
+            ["pdftotext", "-layout", "-x", "0", "-y", "100", "-W", "300", "-H", "1000", filename, "-"]
         ).lower().decode("utf-8")
         right_column_output = subprocess.check_output(
-            ["pdftotext", "-layout", "-x","300", "-y", "110", "-W", "300", "-H", "1000", filename, "-"]
+            ["pdftotext", "-layout", "-x","300", "-y", "100", "-W", "300", "-H", "1000", filename, "-"]
         ).lower().decode("utf-8")
     except subprocess.CalledProcessError as exception:
         raise RuntimeError(
@@ -164,7 +164,6 @@ def get_menu_output():
     column_tuple = extract_pdf_output(weekday)
     column_index, start_index, end_index = get_pdf_indexes(weekday)
     regex_string = r"({}.*?){}".format(start_index, end_index)
-
     regex_object = re.compile(regex_string, re.DOTALL)
     menu_output = re.search(regex_object, column_tuple[column_index]).group(1)
     menu_output = add_formatting(menu_output)
