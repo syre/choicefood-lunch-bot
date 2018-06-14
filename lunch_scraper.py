@@ -7,7 +7,6 @@ import subprocess
 import os
 import base64
 
-import googleapiclient
 import requests
 import bs4
 
@@ -73,6 +72,7 @@ def get_pdf_indexes(weekday):
     else:
         return column_index, (*WEEKDAY_MENU_INDEXES_DICT[weekday])
 
+
 def extract_link_from_message_body(body):
     week_pattern = get_week_pattern()
     soup = bs4.BeautifulSoup(body, "html.parser")
@@ -81,9 +81,10 @@ def extract_link_from_message_body(body):
         return element["href"]
     return None
 
-def get_lunch_message_bodies():
+
+def get_messages():
     """
-    Retrieve message bodies from Gmail with lunch bot label.
+    Retrieve messages from Gmail with lunch bot label.
     """
     week_pattern = get_week_pattern()
 
@@ -100,26 +101,31 @@ def get_lunch_message_bodies():
         labelIds=[label["id"]],
         q="Frokostmenu {}".format(week_pattern)
     ).execute()
-    # For each message get the body.
-    message_bodies = []
+    # For each message get the (body, datetime).
+    messages = []
     for message in messages_results["messages"]:
-        message_result = SERVICE.users().messages().get(userId="me", id=message["id"], metadataHeaders=["body"]).execute()
-        html_parts = [part for part in message_result["payload"]["parts"] if part["mimeType"] == "text/html"]
-        email_body = base64.urlsafe_b64decode(html_parts[0]["body"]["data"])
-        message_bodies.append(email_body)
-    return message_bodies
+        message = SERVICE.users().messages().get(
+            userId="me",
+            id=message["id"],
+            metadataHeaders=["body"]
+        ).execute()
+        messages.append(message)
+    return messages
 
-def extract_pdf_output(weekday):
-    # Grab current weeks PDF menu link.
-    message_bodies = get_lunch_message_bodies()
-    menu_link = None
-    for body in message_bodies:
-        link = extract_link_from_message_body(body)
-        if link:
-            menu_link = link
-        break
-    if not menu_link:
-        raise Exception("Lunch menu link could not be found")
+
+def extract_email_time(message):
+    """Convert from email time which is unix time in ms to datetime."""
+    return datetime.fromtimestamp(int(message["internalDate"])/1000)
+
+
+def extract_email_body(message):
+    """Find html parts of the email, base64 decode the email body"""
+    html_parts = [part for part in message["payload"]["parts"] if part["mimeType"] == "text/html"]
+    email_body = base64.urlsafe_b64decode(html_parts[0]["body"]["data"])
+    return email_body
+
+
+def extract_pdf_output(menu_link, weekday):
 
     response = requests.get(menu_link, stream=True)
     # Save the menu to a file and run pdftotext on it.
@@ -154,14 +160,29 @@ def extract_pdf_output(weekday):
 
     return (left_column_output, right_column_output)
 
+
 def add_formatting(output):
+    """Add some nice formatting to the message"""
     output = re.sub(r"\n{1,}", "\n\n", output)
     output = re.sub(r" {2}", "&nbsp;", output)
     return output
 
+
 def get_menu_output():
     weekday = datetime.now().weekday()
-    column_tuple = extract_pdf_output(weekday)
+    messages = get_messages()
+
+    # Grab current weeks PDF menu link.
+    message_bodies = [extract_email_body(message) for message in messages]
+    menu_link = None
+    for body in message_bodies:
+        link = extract_link_from_message_body(body)
+        if link:
+            menu_link = link
+        break
+    if not menu_link:
+        raise Exception("Lunch menu link could not be found")
+    column_tuple = extract_pdf_output(menu_link, weekday)
     column_index, start_index, end_index = get_pdf_indexes(weekday)
     regex_string = r"({}.*?){}".format(start_index, end_index)
     regex_object = re.compile(regex_string, re.DOTALL)
@@ -172,4 +193,3 @@ def get_menu_output():
 
 if __name__ == '__main__':
     print(get_menu_output())
-
