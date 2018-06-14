@@ -84,7 +84,7 @@ def extract_link_from_message_body(body):
 
 def get_messages():
     """
-    Retrieve messages from Gmail with lunch bot label.
+    Retrieve messages from Gmail with lunch bot label and the week pattern.
     """
     week_pattern = get_week_pattern()
 
