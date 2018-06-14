@@ -24,6 +24,7 @@ from lunch_scraper import (
 
 
 def is_seven_o_clock(email_datetime):
+    """Check if datetime is seven o clock in the morning."""
     now = datetime.now()
     if now.hour == 7:
         return True
@@ -31,6 +32,7 @@ def is_seven_o_clock(email_datetime):
 
 
 def is_in_previous_hour(email_datetime):
+    """Check if datetime was in the previous hour."""
     now = datetime.now()
     previous_hour = (now - timedelta(hours=1)).replace(
         minute=0,
@@ -59,6 +61,9 @@ send_message = is_in_previous_hour(email_time) or is_seven_o_clock(email_time)
 output = get_menu_output()
 if send_message:
     print("sending message!")
-    requests.post(WEB_HOOK_POST_URL, json={"title": "Today's menu", "text": output})
+    requests.post(
+        WEB_HOOK_POST_URL,
+        json={"title": "Today's menu", "text": output}
+    )
 else:
     print("time is not right yet!")
