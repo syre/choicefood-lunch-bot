@@ -3,12 +3,12 @@
 """
 This script should run hourly.
 
-If the email message is received within the previous hour we can send the payload,
-alternatively if it's currently 7:00 we send the message.
+If the email message is received within the previous hour we can send
+the payload, alternatively if it's currently 7:00 we send the message.
 
-Eg. email received 6:00, the script runs at 7:00 and should send the payload there.
-    email received 6:00, the script runs at 8:00 and should not send the payload.
-    email received yesterday at 7:00, the script runs at 7:00 and sends the payload.
+Eg. email received 6:00, script runs at 7:00 and does not send the payload.
+    email received 6:00, script runs at 8:00 and does not send the payload.
+    email received yesterday at 7:00, script runs at 7:00, sends the payload.
 """
 import requests
 from datetime import (
