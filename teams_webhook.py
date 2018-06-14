@@ -23,16 +23,26 @@ from lunch_scraper import (
 )
 
 
-def is_in_previous_hour_or_seven_o_clock(email_datetime):
-    import pdb; pdb.set_trace()
+def is_seven_o_clock(email_datetime):
     now = datetime.now()
-    previous_hour = (datetime.now() - timedelta(hours=1)).replace(
+    if now.hour == 7:
+        return True
+    return False
+
+
+def is_in_previous_hour(email_datetime):
+    now = datetime.now()
+    previous_hour = (now - timedelta(hours=1)).replace(
         minute=0,
         second=0,
         microsecond=0
     )
-    email_datetime_hour = email_datetime.replace(minute=0, second=0, microsecond=0)
-    if previous_hour == email_datetime_hour or now.hour == 7:
+    email_datetime_hour = email_datetime.replace(
+        minute=0,
+        second=0,
+        microsecond=0
+    )
+    if previous_hour == email_datetime_hour:
         return True
     return False
 
@@ -45,10 +55,10 @@ WEB_HOOK_POST_URL = (
 )
 messages = get_messages()
 email_time = [extract_email_time(message) for message in messages][0]
-send_message = is_in_previous_hour_or_seven_o_clock(email_time)
+send_message = is_in_previous_hour(email_time) or is_seven_o_clock(email_time)
 output = get_menu_output()
 if send_message:
     print("sending message!")
-    #requests.post(WEB_HOOK_POST_URL, json={"title": "Today's menu", "text": output})
+    requests.post(WEB_HOOK_POST_URL, json={"title": "Today's menu", "text": output})
 else:
     print("time is not right yet!")
