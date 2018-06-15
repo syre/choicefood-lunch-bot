@@ -55,15 +55,18 @@ WEB_HOOK_POST_URL = (
     "IncomingWebhook/1daa413023754b02b1744faa1893b7eb/"
     "0106ec0d-7bf2-46d9-8192-7408b6d52db3"
 )
-messages = get_messages()
-email_time = [extract_email_time(message) for message in messages][0]
-send_message = is_in_previous_hour(email_time) or is_seven_o_clock(email_time)
-output = get_menu_output()
-if send_message:
-    print("sending message!")
-    requests.post(
-        WEB_HOOK_POST_URL,
-        json={"title": "Today's menu", "text": output}
-    )
-else:
-    print("time is not right yet!")
+if __name__ == '__main__':
+    messages = get_messages()
+    if not messages:
+        return
+    email_time = [extract_email_time(message) for message in messages][0]
+    send_message = is_in_previous_hour(email_time) or is_seven_o_clock(email_time)
+    output = get_menu_output()
+    if send_message:
+        print("sending message!")
+        requests.post(
+            WEB_HOOK_POST_URL,
+            json={"title": "Today's menu", "text": output}
+        )
+    else:
+        print("time is not right yet!")
