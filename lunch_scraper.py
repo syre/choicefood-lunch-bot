@@ -73,8 +73,9 @@ def get_pdf_indexes(weekday):
         return column_index, (*WEEKDAY_MENU_INDEXES_DICT[weekday])
 
 
-def extract_link_from_message_body(body):
+def extract_link_from_message(message):
     week_pattern = get_week_pattern()
+    body = extract_email_body(message)
     soup = bs4.BeautifulSoup(body, "html.parser")
     element = soup.find("a", text=re.compile(week_pattern))
     if element:
@@ -171,15 +172,11 @@ def add_formatting(output):
 def get_menu_output():
     weekday = datetime.now().weekday()
     messages = get_messages()
-
+    if not messages:
+        raise Exception("Lunch message could not be found")
     # Grab current weeks PDF menu link.
-    message_bodies = [extract_email_body(message) for message in messages]
-    menu_link = None
-    for body in message_bodies:
-        link = extract_link_from_message_body(body)
-        if link:
-            menu_link = link
-        break
+    message = messages[0]
+    menu_link = extract_link_from_message(message)
     if not menu_link:
         raise Exception("Lunch menu link could not be found")
     column_tuple = extract_pdf_output(menu_link, weekday)
