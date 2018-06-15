@@ -10,6 +10,7 @@ Eg. email received 6:00, script runs at 7:00 and does not send the payload.
     email received 6:00, script runs at 8:00 and does not send the payload.
     email received yesterday at 7:00, script runs at 7:00, sends the payload.
 """
+import sys
 import requests
 from datetime import (
     datetime,
@@ -20,6 +21,7 @@ from lunch_scraper import (
     get_menu_output,
     get_messages,
     extract_email_time,
+    extract_link_from_message
 )
 
 
@@ -58,15 +60,24 @@ WEB_HOOK_POST_URL = (
 if __name__ == '__main__':
     messages = get_messages()
     if not messages:
-        return
-    email_time = [extract_email_time(message) for message in messages][0]
+        sys.exit()
+    # We assume there is only one message
+    message = messages[0]
+    menu_link = extract_link_from_message(message)
+    email_time = extract_email_time(message)
     send_message = is_in_previous_hour(email_time) or is_seven_o_clock(email_time)
     output = get_menu_output()
     if send_message:
         print("sending message!")
         requests.post(
             WEB_HOOK_POST_URL,
-            json={"title": "Today's menu", "text": output}
+            json={
+                "title": "Today's menu",
+                "text": "[menu link]({})\n\n{}".format(
+                    menu_link,
+                    output
+                )
+            }
         )
     else:
         print("time is not right yet!")
