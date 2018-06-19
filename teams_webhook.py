@@ -15,6 +15,7 @@ import requests
 from datetime import (
     datetime,
     timedelta,
+    timezone,
 )
 
 from lunch_scraper import (
@@ -25,9 +26,14 @@ from lunch_scraper import (
 )
 
 
-def is_seven_o_clock(email_datetime):
-    """Check if datetime is seven o clock in the morning."""
-    now = datetime.now()
+def is_seven_o_clock_danish_time(email_datetime):
+    """Check if datetime is seven o clock in the morning in Denmark."""
+    # Convert to +2 danish timezone.
+    now = datetime.replace(
+        tzinfo=timezone.utc
+    ).astimezone(
+        tz=timezone(timedelta(hours=2))
+    )
     if now.hour == 7:
         return True
     return False
@@ -65,7 +71,7 @@ if __name__ == '__main__':
     message = messages[0]
     menu_link = extract_link_from_message(message)
     email_time = extract_email_time(message)
-    send_message = is_in_previous_hour(email_time) or is_seven_o_clock(email_time)
+    send_message = is_in_previous_hour(email_time) or is_seven_o_clock_danish_time(email_time)
     output = get_menu_output()
     if send_message:
         print("sending message!")
