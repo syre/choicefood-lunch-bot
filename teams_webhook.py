@@ -59,8 +59,8 @@ def is_in_previous_hour(email_datetime):
 
 WEB_HOOK_POST_URL = (
     "https://outlook.office.com/webhook/"
-    "866381db-7215-4044-ab9f-f391ea683a74@***REMOVED***/"
-    "IncomingWebhook/1daa413023754b02b1744faa1893b7eb/"
+    "***REMOVED******REMOVED***/"
+    "IncomingWebhook/***REMOVED***/"
     "***REMOVED***"
 )
 if __name__ == '__main__':
