@@ -143,10 +143,10 @@ def extract_pdf_output(menu_link, weekday):
                 file.write(chunk)
     try:
         left_column_output = subprocess.check_output(
-            ["pdftotext", "-layout", "-x", "0", "-y", "100", "-W", "300", "-H", "1000", filename, "-"]
+            ["pdftotext", "-layout", "-x", "0", "-y", "90", "-W", "300", "-H", "1000", filename, "-"]
         ).lower().decode("utf-8")
         right_column_output = subprocess.check_output(
-            ["pdftotext", "-layout", "-x","300", "-y", "100", "-W", "300", "-H", "1000", filename, "-"]
+            ["pdftotext", "-layout", "-x","300", "-y", "90", "-W", "300", "-H", "1000", filename, "-"]
         ).lower().decode("utf-8")
     except subprocess.CalledProcessError as exception:
         raise RuntimeError(
