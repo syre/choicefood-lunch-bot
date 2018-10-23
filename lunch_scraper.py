@@ -17,24 +17,24 @@ from oauth2client import file, client, tools
 # Setup the Gmail API
 SCOPES = 'https://www.googleapis.com/auth/gmail.readonly'
 STORE = file.Storage(
-        os.path.join(
-            os.path.dirname(os.path.realpath(__file__)),
-            'credentials.json'
-        )
+    os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        'credentials.json'
+    )
 )
 CREDS = STORE.get()
 if not CREDS or CREDS.invalid:
-    secret_path = os.path.join(
+    SECRET_PATH = os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
         'client_secret.json'
     )
-    FLOW = client.flow_from_clientsecrets(secret_path, SCOPES)
+    FLOW = client.flow_from_clientsecrets(SECRET_PATH, SCOPES)
     CREDS = tools.run_flow(FLOW, STORE)
 
 SERVICE = build('gmail', 'v1', http=CREDS.authorize(Http()))
 
 """
-Menu setup is like this:
+Menu setup is like this (2 columns, 3 rows):
 
 Monday    Tuesday
 Wednesday Thursday
@@ -45,14 +45,19 @@ WEEKDAY_MENU_INDEXES_DICT = {
     0: ("mandag", "onsdag"),
     1: ("tirsdag", "torsdag"),
     2: ("onsdag", "fredag"),
-    # Thursday is last in column 2 so end index is the right column footer.
+    # Thursday is last in column 1 so end index is the right column footer.
     3: ("torsdag", "velbekomme"),
-    # Friday is last in column 1 so end index is the left column footer.
+    # Friday is last in column 0 so end index is the left column footer.
     4: ("fredag", "www.choicefood.dk")
 }
 
 
 def get_week_pattern():
+    """
+    Get current week pattern for email searching.
+
+    For example "uge 43".
+    """
     week_pattern = "uge {}"
     now = datetime.now()
     # If it's weekend, get next week.
@@ -64,16 +69,23 @@ def get_week_pattern():
 
 
 def get_pdf_indexes(weekday):
+    """
+    Get the pdf column-, start- and end-indexes for a weekday.
+
+    A monday would return 0, "mandag", "onsdag" as indexes.
+    """
     # Get column.
     column_index = 0 if weekday % 2 == 0 else 1
     # If it's weekend let's take mondays menu.
     if weekday > 4:
         return column_index, (*WEEKDAY_MENU_INDEXES_DICT[0])
-    else:
-        return column_index, (*WEEKDAY_MENU_INDEXES_DICT[weekday])
+    return column_index, (*WEEKDAY_MENU_INDEXES_DICT[weekday])
 
 
 def extract_link_from_message(message):
+    """
+    Extract the menu link from the message.
+    """
     week_pattern = get_week_pattern()
     body = extract_email_body(message)
     soup = bs4.BeautifulSoup(body, "html.parser")
@@ -83,9 +95,9 @@ def extract_link_from_message(message):
     return None
 
 
-def get_messages():
+def get_emails():
     """
-    Retrieve messages from Gmail with lunch bot label and the week pattern.
+    Retrieve emails from Gmail with lunch bot label and the week pattern.
     """
     week_pattern = get_week_pattern()
 
@@ -126,8 +138,10 @@ def extract_email_body(message):
     return email_body
 
 
-def extract_pdf_output(menu_link, weekday):
-
+def extract_pdf_text(menu_link, weekday):
+    """
+    Extract the pdf text for a menu with a link
+    """
     response = requests.get(menu_link, stream=True)
     # Save the menu to a file and run pdftotext on it.
     if response.status_code != 200:
@@ -146,7 +160,7 @@ def extract_pdf_output(menu_link, weekday):
             ["pdftotext", "-layout", "-x", "0", "-y", "90", "-W", "300", "-H", "1000", filename, "-"]
         ).lower().decode("utf-8")
         right_column_output = subprocess.check_output(
-            ["pdftotext", "-layout", "-x","300", "-y", "90", "-W", "300", "-H", "1000", filename, "-"]
+            ["pdftotext", "-layout", "-x", "300", "-y", "90", "-W", "300", "-H", "1000", filename, "-"]
         ).lower().decode("utf-8")
     except subprocess.CalledProcessError as exception:
         raise RuntimeError(
@@ -171,7 +185,7 @@ def add_formatting(output):
 
 def get_menu_output():
     weekday = datetime.now().weekday()
-    messages = get_messages()
+    messages = get_emails()
     if not messages:
         raise Exception("Lunch message could not be found")
     # Grab current weeks PDF menu link.
@@ -179,7 +193,7 @@ def get_menu_output():
     menu_link = extract_link_from_message(message)
     if not menu_link:
         raise Exception("Lunch menu link could not be found")
-    column_tuple = extract_pdf_output(menu_link, weekday)
+    column_tuple = extract_pdf_text(menu_link, weekday)
     column_index, start_index, end_index = get_pdf_indexes(weekday)
     regex_string = r"({}.*?){}".format(start_index, end_index)
     regex_object = re.compile(regex_string, re.DOTALL)
