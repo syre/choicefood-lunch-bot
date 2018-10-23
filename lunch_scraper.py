@@ -151,10 +151,10 @@ def extract_pdf_text(menu_link, weekday):
             )
         )
     filename = "menu.pdf"
-    with open(filename, "wb") as file:
+    with open(filename, "wb") as pdf_file:
         for chunk in response.iter_content(chunk_size=1024):
             if chunk:
-                file.write(chunk)
+                pdf_file.write(chunk)
     try:
         left_column_output = subprocess.check_output(
             ["pdftotext", "-layout", "-x", "0", "-y", "90", "-W", "300", "-H", "1000", filename, "-"]
