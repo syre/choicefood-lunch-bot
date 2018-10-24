@@ -27,9 +27,8 @@ from lunch_scraper import (
 )
 
 
-def is_seven_o_clock_danish_time(email_datetime):
+def is_seven_o_clock_danish_time():
     """Check if datetime is seven o clock in the morning in Denmark."""
-    # Convert to +2 danish timezone.
     now = datetime.now(
         tz=timezone("Europe/Copenhagen")
     )
@@ -71,7 +70,7 @@ if __name__ == '__main__':
     menu_link = extract_link_from_message(message)
     email_time = extract_email_time(message)
     send_message = (is_in_previous_hour(email_time) or
-                    is_seven_o_clock_danish_time(email_time))
+                    is_seven_o_clock_danish_time())
     output = get_menu_output()
     if send_message:
         print("sending message!")
