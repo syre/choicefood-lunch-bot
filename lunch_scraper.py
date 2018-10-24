@@ -193,11 +193,15 @@ def get_menu_output():
     menu_link = extract_link_from_message(message)
     if not menu_link:
         raise Exception("Lunch menu link could not be found")
-    column_tuple = extract_pdf_text(menu_link, weekday)
+    # Extract the two text columns.
+    text_columns = extract_pdf_text(menu_link, weekday)
+    # Get the pdf indexes for the current weekday.
     column_index, start_index, end_index = get_pdf_indexes(weekday)
+    # Extract the weekday text separated by the indexes.
     regex_string = r"({}.*?){}".format(start_index, end_index)
     regex_object = re.compile(regex_string, re.DOTALL)
-    menu_output = re.search(regex_object, column_tuple[column_index]).group(1)
+    menu_output = re.search(regex_object, text_columns[column_index]).group(1)
+
     menu_output = add_formatting(menu_output)
     return menu_output
 
