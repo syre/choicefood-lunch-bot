@@ -95,7 +95,7 @@ def extract_link_from_message(message):
     return None
 
 
-def get_emails():
+def get_messages():
     """
     Retrieve emails from Gmail with lunch bot label and the week pattern.
     """
@@ -185,7 +185,7 @@ def add_formatting(output):
 
 def get_menu_output():
     weekday = datetime.now().weekday()
-    messages = get_emails()
+    messages = get_messages()
     if not messages:
         raise Exception("Lunch message could not be found")
     # Grab current weeks PDF menu link.
