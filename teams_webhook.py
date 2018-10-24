@@ -11,12 +11,13 @@ Eg. email received 6:00, script runs at 7:00 and does not send the payload.
     email received yesterday at 7:00, script runs at 7:00, sends the payload.
 """
 import sys
-import requests
 from datetime import (
     datetime,
     timedelta,
-    timezone,
 )
+
+import requests
+from pytz import timezone
 
 from lunch_scraper import (
     get_menu_output,
@@ -29,10 +30,8 @@ from lunch_scraper import (
 def is_seven_o_clock_danish_time(email_datetime):
     """Check if datetime is seven o clock in the morning in Denmark."""
     # Convert to +2 danish timezone.
-    now = datetime.now().replace(
-        tzinfo=timezone.utc
-    ).astimezone(
-        tz=timezone(timedelta(hours=2))
+    now = datetime.now(
+        tz=timezone("Europe/Copenhagen")
     )
     if now.hour == 7:
         return True
