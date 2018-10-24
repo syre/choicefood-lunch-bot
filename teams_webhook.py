@@ -65,7 +65,7 @@ if __name__ == '__main__':
     messages = get_messages()
     if not messages:
         sys.exit()
-    # We assume there is only one message
+    # We assume there is only one message.
     message = messages[0]
     menu_link = extract_link_from_message(message)
     email_time = extract_email_time(message)
