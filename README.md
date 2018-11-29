@@ -1,9 +1,9 @@
 # LunchBot
 
 This is the official LunchBot for scraping menu emails received from the caterer https://choicefood.dk/ from a [Gmail account](http://gmail.com/) and posting them to your chat client of choice ([Microsoft Teams](http://teams.microsoft.com/) and [Ryver](https://ryver.com/) right now).
-
-[Example LunchBot output](https://gitlab.com/syre/choicefood-lunch-bot/raw/master/examples/lunchbot_example.gif)
-[Example Teams Webhook output](https://gitlab.com/syre/choicefood-lunch-bot/raw/master/examples/teams_webhook_example.png?raw=true)
+# Demo
+![Example LunchBot output](https://gitlab.com/syre/choicefood-lunch-bot/raw/master/examples/lunchbot_example.gif)
+![Example Teams Webhook output](https://gitlab.com/syre/choicefood-lunch-bot/raw/master/examples/teams_webhook_example.png?raw=true)
 
 # Requirements
 * python requirements defined in the `requirements.txt`
