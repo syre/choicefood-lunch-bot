@@ -11,13 +11,8 @@ Eg. email received 6:00, script runs at 7:00 and does not send the payload.
     email received yesterday at 7:00, script runs at 7:00, sends the payload.
 """
 import sys
-from datetime import (
-    datetime,
-    timedelta,
-)
 
 import requests
-from pytz import timezone
 
 from utils import (
     is_in_previous_hour,
@@ -32,7 +27,8 @@ from lunch_scraper import (
 
 WEB_HOOK_POST_URL = (
     "https://outlook.office.com/webhook/"
-    "***REMOVED******REMOVED***/"
+    "***REMOVED***"
+    "***REMOVED***/"
     "IncomingWebhook/***REMOVED***/"
     "***REMOVED***"
 )
@@ -47,6 +43,7 @@ if __name__ == '__main__':
     send_message = (is_in_previous_hour(email_time) or
                     is_seven_o_clock_danish_time())
     output = get_menu_output()
+
     if send_message:
         print("sending message!")
         requests.post(
