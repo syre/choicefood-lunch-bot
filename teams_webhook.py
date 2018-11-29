@@ -24,14 +24,8 @@ from lunch_scraper import (
     extract_email_time,
     extract_link_from_message
 )
+from settings import TEAMS_WEB_HOOK_POST_URL
 
-WEB_HOOK_POST_URL = (
-    "https://outlook.office.com/webhook/"
-    "***REMOVED***"
-    "***REMOVED***/"
-    "IncomingWebhook/***REMOVED***/"
-    "***REMOVED***"
-)
 if __name__ == '__main__':
     messages = get_messages()
     if not messages:
@@ -47,7 +41,7 @@ if __name__ == '__main__':
     if send_message:
         print("sending message!")
         requests.post(
-            WEB_HOOK_POST_URL,
+            TEAMS_WEB_HOOK_POST_URL,
             json={
                 "title": "Today's menu",
                 "text": "[menu link]({})\n\n{}".format(

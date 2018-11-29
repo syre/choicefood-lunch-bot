@@ -14,6 +14,8 @@ from apiclient.discovery import build
 from httplib2 import Http
 from oauth2client import file, client, tools
 
+from settings import EMAIL_LABEL
+
 # Setup the Gmail API
 SCOPES = 'https://www.googleapis.com/auth/gmail.readonly'
 STORE = file.Storage(
@@ -101,10 +103,8 @@ def get_messages():
     """
     week_pattern = get_current_week_pattern()
 
-    label_name = "ChoiceFoodLunchBot"
-
     label_results = SERVICE.users().labels().list(userId='me').execute()
-    labels = [label for label in label_results["labels"] if label["name"] == label_name]
+    labels = [label for label in label_results["labels"] if label["name"] == EMAIL_LABEL]
     if not labels:
         raise Exception("Lunch Bot label could not be found")
     label = labels[0]
