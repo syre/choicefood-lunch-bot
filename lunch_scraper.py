@@ -101,7 +101,7 @@ def get_messages():
     """
     week_pattern = get_current_week_pattern()
 
-    label_name = "SaxoLunchBot"
+    label_name = "ChoiceFoodLunchBot"
 
     label_results = SERVICE.users().labels().list(userId='me').execute()
     labels = [label for label in label_results["labels"] if label["name"] == label_name]
