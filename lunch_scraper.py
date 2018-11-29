@@ -14,6 +14,7 @@ from apiclient.discovery import build
 from httplib2 import Http
 from oauth2client import file, client, tools
 
+from utils import remove_excessive_spacing
 from settings import EMAIL_LABEL
 
 # Setup the Gmail API
@@ -176,13 +177,6 @@ def extract_pdf_text(menu_link, weekday):
     return (left_column_output, right_column_output)
 
 
-def add_formatting(output):
-    """Add some nice formatting to the message"""
-    output = re.sub(r"\n{1,}", "\n\n", output)
-    output = re.sub(r" {2}", "&nbsp;", output)
-    return output
-
-
 def get_menu_output():
     weekday = datetime.now().weekday()
     messages = get_messages()
@@ -202,7 +196,7 @@ def get_menu_output():
     regex_object = re.compile(regex_string, re.DOTALL)
     menu_output = re.search(regex_object, text_columns[column_index]).group(1)
 
-    menu_output = add_formatting(menu_output)
+    menu_output = remove_excessive_spacing(menu_output)
     return menu_output
 
 

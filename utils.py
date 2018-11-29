@@ -3,6 +3,7 @@
 """
 Module containing various utilities for the lunch bot.
 """
+import re
 from datetime import (
     datetime,
     timedelta,
@@ -35,3 +36,13 @@ def is_in_previous_hour(email_datetime):
     if previous_hour == email_datetime_hour:
         return True
     return False
+
+def add_formatting(output):
+    """Add some nice formatting to the message"""
+    output = re.sub(r"\n{1,}", "\n\n", output)
+    output = re.sub(r" {2}", "&nbsp;", output)
+    return output
+
+def remove_excessive_spacing(output):
+    output = re.sub(r"\n{1,}", "\n", output)
+    return output
