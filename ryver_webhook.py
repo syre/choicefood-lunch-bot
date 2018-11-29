@@ -1,10 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import requests
-import json
+import sys
 
-import lunch_scraper
+import requests
+
+from utils import (
+    is_in_previous_hour,
+    is_seven_o_clock_danish_time,
+    remove_excessive_spacing,
+)
+from lunch_scraper import (
+    get_menu_output,
+    get_messages,
+    extract_email_time,
+    extract_link_from_message
+)
 from settings import RYVER_WEB_HOOK_POST_URL
 
 if __name__ == '__main__':
@@ -18,8 +29,9 @@ if __name__ == '__main__':
     send_message = (is_in_previous_hour(email_time) or
                     is_seven_o_clock_danish_time())
     output = get_menu_output()
+    formatted_output = remove_excessive_spacing(output)
 
     if send_message:
-        requests.post(settings.RYVER_WEB_HOOK_POST_URL, json={"body": output})
+        requests.post(RYVER_WEB_HOOK_POST_URL, json={"body": formatted_output})
     else:
         print("time is not right yet!")
