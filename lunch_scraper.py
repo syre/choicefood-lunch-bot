@@ -52,7 +52,7 @@ WEEKDAY_MENU_INDEXES_DICT = {
 }
 
 
-def get_week_pattern():
+def get_current_week_pattern():
     """
     Get current week pattern for email searching.
 
@@ -86,7 +86,7 @@ def extract_link_from_message(message):
     """
     Extract the menu link from the message.
     """
-    week_pattern = get_week_pattern()
+    week_pattern = get_current_week_pattern()
     body = extract_email_body(message)
     soup = bs4.BeautifulSoup(body, "html.parser")
     element = soup.find("a", text=re.compile(week_pattern))
@@ -99,7 +99,7 @@ def get_messages():
     """
     Retrieve emails from Gmail with lunch bot label and the week pattern.
     """
-    week_pattern = get_week_pattern()
+    week_pattern = get_current_week_pattern()
 
     label_name = "SaxoLunchBot"
 
