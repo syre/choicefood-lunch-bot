@@ -19,41 +19,16 @@ from datetime import (
 import requests
 from pytz import timezone
 
+from utils import (
+    is_in_previous_hour,
+    is_seven_o_clock_danish_time
+)
 from lunch_scraper import (
     get_menu_output,
     get_messages,
     extract_email_time,
     extract_link_from_message
 )
-
-
-def is_seven_o_clock_danish_time():
-    """Check if datetime is seven o clock in the morning in Denmark."""
-    now = datetime.now(
-        tz=timezone("Europe/Copenhagen")
-    )
-    if now.hour == 7:
-        return True
-    return False
-
-
-def is_in_previous_hour(email_datetime):
-    """Check if datetime was in the previous hour."""
-    now = datetime.now()
-    previous_hour = (now - timedelta(hours=1)).replace(
-        minute=0,
-        second=0,
-        microsecond=0
-    )
-    email_datetime_hour = email_datetime.replace(
-        minute=0,
-        second=0,
-        microsecond=0
-    )
-    if previous_hour == email_datetime_hour:
-        return True
-    return False
-
 
 WEB_HOOK_POST_URL = (
     "https://outlook.office.com/webhook/"
