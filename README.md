@@ -11,7 +11,7 @@ This is the official LunchBot for scraping menu emails received from the caterer
 
 # Installation
 
-As the mighty Ronnie from ChoiceFood.dk only shares his menu with his most intimate of friends through email, the requirements right now are a bit intricate.
+As the mighty chef Ronnie from ChoiceFood.dk only shares his menu with his most intimate of friends through email, the requirements right now are a bit intricate.
 
 1. label all incoming mail from email@choicefood.dk
 2. input the web hook url from the chat client of your choice and the email label name into the sample `settings.py` file
