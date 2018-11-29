@@ -3,14 +3,10 @@
 
 import requests
 import json
+
 import lunch_scraper
+from settings import RYVER_WEB_HOOK_POST_URL
 
-WEB_HOOK_POST_URL = (
-    "https://saxo.ryver.com/application/"
-    "webhook/Tz2BoOfe64VhDxY"
-)
-
-output = lunch_scraper.get_menu_output()
 if __name__ == '__main__':
     messages = get_messages()
     if not messages:
@@ -24,6 +20,6 @@ if __name__ == '__main__':
     output = get_menu_output()
 
     if send_message:
-        requests.post(WEB_HOOK_POST_URL, json={"body": output})
+        requests.post(settings.RYVER_WEB_HOOK_POST_URL, json={"body": output})
     else:
         print("time is not right yet!")

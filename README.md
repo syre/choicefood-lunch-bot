@@ -1,6 +1,6 @@
 # LunchBot
 
-This is the official LunchBot for scraping menu emails received from the caterer https://choicefood.dk/ and posting them to your chat client of choice (Teams and Ryver right now).
+This is the official LunchBot for scraping menu emails received from the caterer https://choicefood.dk/ from a [Gmail account](http://gmail.com/) and posting them to your chat client of choice ([Microsoft Teams](http://teams.microsoft.com/) and [Ryver](https://ryver.com/) right now).
 
 Example LunchBot output:
 ![LunchBot output](https://gitlab.com/syre/choicefood-lunch-bot/raw/master/examples/lunchbot_example.png?raw=true)
@@ -8,3 +8,7 @@ Example LunchBot output:
 # Requirements
 
 As the mighty Ronnie from ChoiceFood.dk only shares his menu with his most intimate of friends through email, the requirements right now are a bit intricate.
+
+1.
+2.
+3.
