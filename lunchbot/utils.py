@@ -10,12 +10,12 @@ from datetime import (
 )
 from pytz import timezone
 
-def is_seven_o_clock_danish_time():
-    """Check if datetime is seven o clock in the morning in Denmark."""
-    now = datetime.now(
-        tz=timezone("Europe/Copenhagen")
-    )
-    if now.hour == 7:
+def is_seven_o_clock_danish_time(datetime):
+    """Check if datetime is in seven o clock range in Denmark."""
+    danish_timezone = timezone("Europe/Copenhagen")
+    danish_time = datetime.astimezone(danish_timezone)
+
+    if danish_time.hour == 7:
         return True
     return False
 
