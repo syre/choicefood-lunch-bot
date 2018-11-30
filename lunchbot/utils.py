@@ -20,20 +20,10 @@ def is_seven_o_clock_danish_time(datetime):
     return False
 
 
-def is_in_previous_hour(email_datetime):
-    """Check if datetime was in the previous hour."""
-    now = datetime.now()
-    previous_hour = (now - timedelta(hours=1)).replace(
-        minute=0,
-        second=0,
-        microsecond=0
-    )
-    email_datetime_hour = email_datetime.replace(
-        minute=0,
-        second=0,
-        microsecond=0
-    )
-    if previous_hour == email_datetime_hour:
+def is_in_previous_hour(now_datetime, email_datetime):
+    """Check if datetime was in the previous hour compared to now."""
+    previous_hour = (now_datetime - timedelta(hours=1))
+    if email_datetime.hour == previous_hour.hour:
         return True
     return False
 
