@@ -1,4 +1,4 @@
-# LunchBot
+# Choicefood.dk LunchBot
 
 This is the official (not really) LunchBot for scraping menu emails received from the caterer [Choicefood.dk](https://choicefood.dk/) from a [Gmail account](http://gmail.com/) and posting them to your chat client of choice ([Microsoft Teams](http://teams.microsoft.com/) and [Ryver](https://ryver.com/) right now).
 # Demo
