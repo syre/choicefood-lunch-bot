@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+from datetime import datetime
 
 import requests
 
@@ -19,6 +20,7 @@ from lunch_scraper import (
 from settings import RYVER_WEB_HOOK_POST_URL
 
 if __name__ == '__main__':
+    now = datetime.now()
     messages = get_messages()
     if not messages:
         sys.exit()
@@ -27,7 +29,7 @@ if __name__ == '__main__':
     menu_link = extract_link_from_message(message)
     email_time = extract_email_time(message)
     send_message = (is_in_previous_hour(email_time) or
-                    is_seven_o_clock_danish_time())
+                    is_seven_o_clock_danish_time(now))
     output = get_menu_output()
     formatted_output = remove_excessive_spacing(output)
 
