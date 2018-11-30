@@ -43,6 +43,7 @@ def add_formatting(output):
     output = re.sub(r" {2}", "&nbsp;", output)
     return output
 
-def remove_excessive_spacing(output):
+def remove_excessive_newlines(output):
+    """Replace sequences of more than one newlines with just one"""
     output = re.sub(r"\n{1,}", "\n", output)
     return output

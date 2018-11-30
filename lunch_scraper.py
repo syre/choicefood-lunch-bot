@@ -14,7 +14,7 @@ from apiclient.discovery import build
 from httplib2 import Http
 from oauth2client import file, client, tools
 
-from utils import remove_excessive_spacing
+from utils import remove_excessive_newlines
 from settings import EMAIL_LABEL
 
 # Setup the Gmail API
@@ -139,7 +139,7 @@ def extract_email_body(message):
     return email_body
 
 
-def extract_pdf_text(menu_link, weekday):
+def extract_pdf_text(menu_link):
     """
     Extract the pdf text for a menu with a link
     """
@@ -178,6 +178,9 @@ def extract_pdf_text(menu_link, weekday):
 
 
 def get_menu_output():
+    """
+    Retrieve menu output for the current weekday.
+    """
     weekday = datetime.now().weekday()
     messages = get_messages()
     if not messages:
@@ -188,7 +191,7 @@ def get_menu_output():
     if not menu_link:
         raise Exception("Lunch menu link could not be found")
     # Extract the two text columns.
-    text_columns = extract_pdf_text(menu_link, weekday)
+    text_columns = extract_pdf_text(menu_link)
     # Get the pdf indexes for the current weekday.
     column_index, start_index, end_index = get_pdf_indexes(weekday)
     # Extract the weekday text separated by the indexes.
@@ -196,7 +199,7 @@ def get_menu_output():
     regex_object = re.compile(regex_string, re.DOTALL)
     menu_output = re.search(regex_object, text_columns[column_index]).group(1)
 
-    menu_output = remove_excessive_spacing(menu_output)
+    menu_output = remove_excessive_newlines(menu_output)
     return menu_output
 
 

@@ -17,7 +17,7 @@ import requests
 from utils import (
     is_in_previous_hour,
     is_seven_o_clock_danish_time,
-    remove_excessive_spacing,
+    remove_excessive_newlines,
 )
 from lunch_scraper import (
     get_menu_output,
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     send_message = (is_in_previous_hour(email_time) or
                     is_seven_o_clock_danish_time())
     output = get_menu_output()
-    formatted_output = remove_excessive_spacing(output)
+    formatted_output = remove_excessive_newlines(output)
 
     if send_message:
         print("sending message!")
