@@ -5,7 +5,7 @@ stages:
   - test_past
 
 before_script:
-  - apt-get update -y && apt-get install -y python2 python3 python-tox
+  - apt-get update -y && apt-get install -y python python3 python-tox
 
 run_tests_default:
   stage: test
