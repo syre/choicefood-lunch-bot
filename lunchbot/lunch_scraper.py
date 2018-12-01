@@ -57,9 +57,9 @@ WEEKDAY_MENU_INDEXES_DICT = {
 }
 
 
-def get_current_week_pattern():
+def get_week_pattern(datetime):
     """
-    Get current week pattern for email searching.
+    Get week pattern for a date for email searching.
 
     For example "uge 43".
     """
@@ -91,7 +91,8 @@ def extract_link_from_message(message):
     """
     Extract the menu link from the message.
     """
-    week_pattern = get_current_week_pattern()
+    now = datetime.now()
+    week_pattern = get_week_pattern(now)
     body = extract_email_body(message)
     soup = bs4.BeautifulSoup(body, "html.parser")
     element = soup.find("a", text=re.compile(week_pattern))
@@ -104,7 +105,8 @@ def get_messages():
     """
     Retrieve emails from Gmail with lunch bot label and the week pattern.
     """
-    week_pattern = get_current_week_pattern()
+    now = datetime.now()
+    week_pattern = get_week_pattern(now)
 
     label_results = SERVICE.users().labels().list(userId='me').execute()
     labels = [label for label in label_results["labels"] if label["name"] == EMAIL_LABEL]
