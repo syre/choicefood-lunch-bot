@@ -57,19 +57,18 @@ WEEKDAY_MENU_INDEXES_DICT = {
 }
 
 
-def get_week_pattern(datetime):
+def get_week_pattern(week_datetime=datetime.now()):
     """
     Get week pattern for a date for email searching.
 
     For example "uge 43".
     """
     week_pattern = "uge {}"
-    now = datetime.now()
     # If it's weekend, get next week.
-    if now.weekday() > 4:
-        week_pattern = week_pattern.format(now.isocalendar()[1] + 1)
+    if week_datetime.weekday() > 4:
+        week_pattern = week_pattern.format(week_datetime.isocalendar()[1] + 1)
     else:
-        week_pattern = week_pattern.format(now.isocalendar()[1])
+        week_pattern = week_pattern.format(week_datetime.isocalendar()[1])
     return week_pattern
 
 
@@ -105,7 +104,7 @@ def get_messages():
     """
     Retrieve emails from Gmail with lunch bot label and the week pattern.
     """
-    now = datetime.now()
+    now = (datetime.now() - timedelta(days=7))
     week_pattern = get_week_pattern(now)
 
     label_results = SERVICE.users().labels().list(userId='me').execute()
@@ -119,7 +118,7 @@ def get_messages():
         labelIds=[label["id"]],
         q="Frokostmenu {}".format(week_pattern)
     ).execute()
-    # For each message get the (body, datetime).
+    # Get all messages.
     messages = []
     for message in messages_results["messages"]:
         message = SERVICE.users().messages().get(
@@ -131,9 +130,9 @@ def get_messages():
     return messages
 
 
-def extract_email_time(message):
-    """Convert from email time which is unix time in ms to datetime."""
-    return datetime.fromtimestamp(int(message["internalDate"])/1000)
+def convert_unix_time_in_ms_to_datetime(unix_time_in_ms):
+    """Convert unix time in ms to a datetime."""
+    return datetime.fromtimestamp(int(unix_time_in_ms)/1000)
 
 
 def extract_email_body(message):

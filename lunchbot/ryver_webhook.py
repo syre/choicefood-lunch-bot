@@ -10,6 +10,7 @@ from utils import (
     is_in_previous_hour,
     is_seven_o_clock_danish_time,
     remove_excessive_spacing,
+    convert_unix_time_in_ms_to_datetime,
 )
 from lunch_scraper import (
     get_menu_output,
@@ -27,7 +28,7 @@ if __name__ == '__main__':
     # We assume there is only one message.
     message = messages[0]
     menu_link = extract_link_from_message(message)
-    email_time = extract_email_time(message)
+    email_time = convert_unix_time_in_ms_to_datetime(message["internalDate"])
     send_message = (is_in_previous_hour(email_time) or
                     is_seven_o_clock_danish_time(now))
     output = get_menu_output()

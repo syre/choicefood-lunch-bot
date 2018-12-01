@@ -17,8 +17,9 @@ Example Teams Webhook output
 
 As the mighty chef Ronnie from Choicefood.dk only shares his menu with his most intimate of friends through email, the requirements right now are a bit intricate.
 
-1. label all incoming mail from email@choicefood.dk with a label name of your choice and set up a web hook in your chat client of choice
-2. input the web hook url and the email label name into the sample `settings.py` file
+1. get on the mailing list (good luck)
+2. label all incoming mail from email@choicefood.dk with a label name of your choice and set up a web hook in your chat client of choice
+3. input the web hook url and the email label name into the sample `settings.py` file
 4. get a `client_secret.json` Oauth 2.0 file file from your [Google Developer Console](https://console.developers.google.com/apis/credentials?pli=1) allowing you to access the Gmail API and place it in the root folder
 5. run `lunch_scraper.py` and allow it to generate a `credentials.json` with the Gmail API
 6. ??
