@@ -1,7 +1,11 @@
 image: ubuntu
+
 stages:
   - test
   - test_past
+
+before_script:
+  apt-get update -y && apt-get install -y python-tox
 
 run_tests_default:
   stage: test
