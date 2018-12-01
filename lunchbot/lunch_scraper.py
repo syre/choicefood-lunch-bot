@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
+from datetime import (
+    datetime,
+    timedelta,
+)
 import re
 import subprocess
 import os
@@ -45,6 +48,8 @@ Monday    Tuesday
 Wednesday Thursday
 Friday
 
+So we create a dict of weekday: (start_index, end_index) tuples
+so we know where the menu for a given weekday starts and ends.
 """
 WEEKDAY_MENU_INDEXES_DICT = {
     0: ("mandag", "onsdag"),
@@ -86,12 +91,11 @@ def get_pdf_indexes(weekday):
     return column_index, (*WEEKDAY_MENU_INDEXES_DICT[weekday])
 
 
-def extract_link_from_message(message):
+def extract_link_from_message(message, week_datetime):
     """
     Extract the menu link from the message.
     """
-    now = datetime.now()
-    week_pattern = get_week_pattern(now)
+    week_pattern = get_week_pattern(week_datetime)
     body = extract_email_body(message)
     soup = bs4.BeautifulSoup(body, "html.parser")
     element = soup.find("a", text=re.compile(week_pattern))
@@ -100,12 +104,11 @@ def extract_link_from_message(message):
     return None
 
 
-def get_messages():
+def get_messages(week_datetime):
     """
-    Retrieve emails from Gmail with lunch bot label and the week pattern.
+    Retrieve emails from Gmail with lunch bot label and from a given week.
     """
-    now = (datetime.now() - timedelta(days=7))
-    week_pattern = get_week_pattern(now)
+    week_pattern = get_week_pattern(week_datetime)
 
     label_results = SERVICE.users().labels().list(userId='me').execute()
     labels = [label for label in label_results["labels"] if label["name"] == EMAIL_LABEL]
@@ -184,19 +187,19 @@ def get_menu_output():
     """
     Retrieve menu output for the current weekday.
     """
-    weekday = datetime.now().weekday()
-    messages = get_messages()
+    now = datetime.now()
+    messages = get_messages(now)
     if not messages:
         raise Exception("Lunch message could not be found")
     # Grab current weeks PDF menu link.
     message = messages[0]
-    menu_link = extract_link_from_message(message)
+    menu_link = extract_link_from_message(message, now)
     if not menu_link:
         raise Exception("Lunch menu link could not be found")
     # Extract the two text columns.
     text_columns = extract_pdf_text(menu_link)
     # Get the pdf indexes for the current weekday.
-    column_index, start_index, end_index = get_pdf_indexes(weekday)
+    column_index, start_index, end_index = get_pdf_indexes(now.weekday())
     # Extract the weekday text separated by the indexes.
     regex_string = r"({}.*?){}".format(start_index, end_index)
     regex_object = re.compile(regex_string, re.DOTALL)
