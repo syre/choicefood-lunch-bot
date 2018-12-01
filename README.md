@@ -5,9 +5,11 @@ This is the official (not really) LunchBot for scraping menu emails received fro
 # Demo
 
 Example LunchBot output
+
 ![Example LunchBot output](https://gitlab.com/syre/choicefood-lunch-bot/raw/master/examples/lunchbot_example.gif)
 
 Example Teams Webhook output
+
 ![Example Teams Webhook output](https://gitlab.com/syre/choicefood-lunch-bot/raw/master/examples/teams_webhook_example.png?raw=true)
 
 # Requirements
