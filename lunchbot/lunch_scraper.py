@@ -133,11 +133,6 @@ def get_messages(week_datetime):
     return messages
 
 
-def convert_unix_time_in_ms_to_datetime(unix_time_in_ms):
-    """Convert unix time in ms to a datetime."""
-    return datetime.fromtimestamp(int(unix_time_in_ms)/1000)
-
-
 def extract_email_body(message):
     """Find html parts of the email, base64 decode the email body"""
     html_parts = [part for part in message["payload"]["parts"] if part["mimeType"] == "text/html"]

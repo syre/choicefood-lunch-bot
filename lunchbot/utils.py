@@ -37,3 +37,8 @@ def remove_excessive_newlines(output):
     """Replace sequences of more than one newlines with just one"""
     output = re.sub(r"\n{1,}", "\n", output)
     return output
+
+
+def convert_unix_time_in_ms_to_datetime(unix_time_in_ms):
+    """Convert unix time in ms to a datetime."""
+    return datetime.fromtimestamp(int(unix_time_in_ms)/1000)
