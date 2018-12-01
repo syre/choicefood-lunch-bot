@@ -1,0 +1,13 @@
+image: ubuntu
+stages:
+  - test
+  - test_past
+
+run_tests_default:
+  stage: test
+  script: tox -e py37
+
+run_tests_py27:
+  stage: test_past
+  script: tox -e py27
+  allow_failure: true
