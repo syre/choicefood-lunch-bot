@@ -9,7 +9,7 @@ before_script:
 
 run_tests_default:
   stage: test
-  script: tox -e py37
+  script: tox -e py36
 
 run_tests_py27:
   stage: test_past
