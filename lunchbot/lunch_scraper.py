@@ -17,6 +17,7 @@ from apiclient.discovery import build
 from httplib2 import Http
 from oauth2client import file, client, tools
 
+from exceptions import LunchBotException
 from utils import remove_excessive_newlines
 from settings import EMAIL_LABEL
 
@@ -113,7 +114,7 @@ def get_messages(week_datetime):
     label_results = SERVICE.users().labels().list(userId='me').execute()
     labels = [label for label in label_results["labels"] if label["name"] == EMAIL_LABEL]
     if not labels:
-        raise Exception("Lunch Bot label could not be found")
+        raise LunchBotException("Lunch Bot label could not be found")
     label = labels[0]
     # Get all messages with lunch bot label.
     messages_results = SERVICE.users().messages().list(
@@ -123,6 +124,8 @@ def get_messages(week_datetime):
     ).execute()
     # Get all messages.
     messages = []
+    if not "messages" in messages_results or messages_results["messages"]:
+        return []
     for message in messages_results["messages"]:
         message = SERVICE.users().messages().get(
             userId="me",
@@ -147,7 +150,7 @@ def extract_pdf_text(menu_link):
     response = requests.get(menu_link, stream=True)
     # Save the menu to a file and run pdftotext on it.
     if response.status_code != 200:
-        raise RuntimeError(
+        raise LunchBotException(
             "unsuccessful response for getting the menu: {}".format(
                 response.status_code
             )
@@ -165,7 +168,7 @@ def extract_pdf_text(menu_link):
             ["pdftotext", "-layout", "-x", "300", "-y", "90", "-W", "300", "-H", "1000", filename, "-"]
         ).lower().decode("utf-8")
     except subprocess.CalledProcessError as exception:
-        raise RuntimeError(
+        raise LunchBotException(
             "command '{}' return with error (code {}): {}".format(
                 exception.cmd,
                 exception.returncode,
@@ -178,30 +181,29 @@ def extract_pdf_text(menu_link):
     return (left_column_output, right_column_output)
 
 
-def get_menu_output():
+def get_menu_output(day_datetime=datetime.now()):
     """
     Retrieve menu output for the current weekday.
     """
-    now = datetime.now()
-    messages = get_messages(now)
+    messages = get_messages(day_datetime)
     if not messages:
-        raise Exception("Lunch message could not be found")
+        raise LunchBotException("Lunch message could not be found")
     # Grab current weeks PDF menu link.
     message = messages[0]
-    menu_link = extract_link_from_message(message, now)
+    menu_link = extract_link_from_message(message, day_datetime)
     if not menu_link:
-        raise Exception("Lunch menu link could not be found")
+        raise LunchBotException("Lunch menu link could not be found")
     # Extract the two text columns.
     text_columns = extract_pdf_text(menu_link)
     # Get the pdf indexes for the current weekday.
-    column_index, start_index, end_index = get_pdf_indexes(now.weekday())
+    column_index, start_index, end_index = get_pdf_indexes(day_datetime.weekday())
     # Extract the weekday text separated by the indexes.
     regex_string = r"({}.*?){}".format(start_index, end_index)
     regex_object = re.compile(regex_string, re.DOTALL)
     menu_output = re.search(regex_object, text_columns[column_index]).group(1)
 
-    menu_output = remove_excessive_newlines(menu_output)
-    return menu_output
+    formatted_menu_output = remove_excessive_newlines(menu_output)
+    return formatted_menu_output
 
 
 if __name__ == '__main__':
