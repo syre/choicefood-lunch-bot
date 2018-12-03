@@ -124,7 +124,7 @@ def get_messages(week_datetime):
     ).execute()
     # Get all messages.
     messages = []
-    if not "messages" in messages_results or messages_results["messages"]:
+    if not "messages" in messages_results or not messages_results["messages"]:
         return []
     for message in messages_results["messages"]:
         message = SERVICE.users().messages().get(
