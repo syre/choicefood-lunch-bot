@@ -9,7 +9,7 @@ import requests
 from utils import (
     is_in_previous_hour,
     is_seven_o_clock_danish_time,
-    remove_excessive_spacing,
+    add_formatting,
     convert_unix_time_in_ms_to_datetime,
 )
 from lunch_scraper import (
@@ -27,12 +27,12 @@ if __name__ == '__main__':
         sys.exit()
     # We assume there is only one message.
     message = messages[0]
-    menu_link = extract_link_from_message(message)
+    menu_link = extract_link_from_message(message, now)
     email_time = convert_unix_time_in_ms_to_datetime(message["internalDate"])
-    send_message = (is_in_previous_hour(email_time) or
+    send_message = (is_in_previous_hour(now, email_time) or
                     is_seven_o_clock_danish_time(now))
     output = get_menu_output()
-    formatted_output = remove_excessive_spacing(output)
+    formatted_output = add_formatting(output)
 
     if send_message:
         requests.post(RYVER_WEB_HOOK_POST_URL, json={"body": formatted_output})
