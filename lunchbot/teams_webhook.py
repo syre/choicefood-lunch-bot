@@ -30,7 +30,7 @@ from settings import TEAMS_WEB_HOOK_POST_URL
 
 if __name__ == '__main__':
     now = datetime.now()
-    messages = get_messages()
+    messages = get_messages(now)
     if not messages:
         sys.exit()
     # We assume there is only one message.
