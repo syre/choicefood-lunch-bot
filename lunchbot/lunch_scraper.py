@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from datetime import (
-    datetime,
-    timedelta,
-)
+from datetime import datetime
 import re
 import subprocess
 import os
@@ -93,9 +90,7 @@ def get_pdf_indexes(weekday):
 
 
 def extract_link_from_message(message, week_datetime):
-    """
-    Extract the menu link from the message.
-    """
+    """Extract the menu link from the message."""
     week_pattern = get_week_pattern(week_datetime)
     body = extract_email_body(message)
     soup = bs4.BeautifulSoup(body, "html.parser")
@@ -106,9 +101,7 @@ def extract_link_from_message(message, week_datetime):
 
 
 def get_messages(week_datetime):
-    """
-    Retrieve emails from Gmail with lunch bot label and from a given week.
-    """
+    """Get emails from Gmail with lunch bot label and from a given week."""
     week_pattern = get_week_pattern(week_datetime)
 
     label_results = SERVICE.users().labels().list(userId='me').execute()
@@ -137,16 +130,14 @@ def get_messages(week_datetime):
 
 
 def extract_email_body(message):
-    """Find html parts of the email, base64 decode the email body"""
+    """Find html parts of the email, base64 decode the email body."""
     html_parts = [part for part in message["payload"]["parts"] if part["mimeType"] == "text/html"]
     email_body = base64.urlsafe_b64decode(html_parts[0]["body"]["data"])
     return email_body
 
 
 def extract_pdf_text(menu_link):
-    """
-    Extract the pdf text for a menu with a link
-    """
+    """Extract the pdf text for a menu with a link."""
     response = requests.get(menu_link, stream=True)
     # Save the menu to a file and run pdftotext on it.
     if response.status_code != 200:
@@ -182,9 +173,7 @@ def extract_pdf_text(menu_link):
 
 
 def get_menu_output(day_datetime=datetime.now()):
-    """
-    Retrieve menu output for the current weekday.
-    """
+    """Retrieve menu output for the current weekday."""
     messages = get_messages(day_datetime)
     if not messages:
         raise LunchBotException("Lunch message could not be found")
