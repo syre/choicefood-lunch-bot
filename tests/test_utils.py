@@ -35,3 +35,9 @@ class TestUtilities():
         previous_hour_datetime = now - timedelta(hours=2)
 
         assert is_in_previous_hour(now, previous_hour_datetime) == False
+
+    def test_is_in_previous_hour_false_yesterday(self):
+        now = datetime.now()
+        previous_hour_datetime = now - timedelta(hours=24)
+
+        assert is_in_previous_hour(now, previous_hour_datetime) == False
