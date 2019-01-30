@@ -1,43 +1,34 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import email
+from email import policy
+import imaplib
 from datetime import datetime
 import re
 import subprocess
 import os
-import base64
-
 import requests
 import bs4
 
-from apiclient.discovery import build
-from httplib2 import Http
-from oauth2client import file, client, tools
 
 from exceptions import LunchBotException
-from utils import remove_excessive_newlines
-from settings import EMAIL_LABEL
-
-# Setup the Gmail API
-SCOPES = 'https://www.googleapis.com/auth/gmail.readonly'
-STORE = file.Storage(
-    os.path.join(
-        os.path.dirname(os.path.realpath(__file__)),
-        "..",
-        'credentials.json'
-    )
+from utils import (
+    remove_excessive_newlines,
+    get_earliest_weekday_date,
 )
-CREDS = STORE.get()
-if not CREDS or CREDS.invalid:
-    SECRET_PATH = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)),
-        "..",
-        'client_secret.json'
-    )
-    FLOW = client.flow_from_clientsecrets(SECRET_PATH, SCOPES)
-    CREDS = tools.run_flow(FLOW, STORE)
 
-SERVICE = build('gmail', 'v1', http=CREDS.authorize(Http()))
+from settings import (
+    EMAIL_LABEL,
+    EMAIL_IMAP_HOST,
+    EMAIL_IMAP_PORT,
+)
+
+# Setup the IMAP client.
+imap = imaplib.IMAP4_SSL(EMAIL_IMAP_HOST, EMAIL_IMAP_PORT)
+
+MAIL_USER = os.environ.get("MAIL_USER")
+MAIL_PASS = os.environ.get("MAIL_PASS")
 
 """
 Menu setup is like this (2 columns, 3 rows):
@@ -101,38 +92,30 @@ def extract_link_from_message(message, week_datetime):
 
 
 def get_messages(week_datetime):
-    """Get emails from Gmail with lunch bot label and from a given week."""
-    week_pattern = get_week_pattern(week_datetime)
-
-    label_results = SERVICE.users().labels().list(userId='me').execute()
-    labels = [label for label in label_results["labels"] if label["name"] == EMAIL_LABEL]
-    if not labels:
-        raise LunchBotException("Lunch Bot label could not be found")
-    label = labels[0]
-    # Get all messages with lunch bot label.
-    messages_results = SERVICE.users().messages().list(
-        userId="me",
-        labelIds=[label["id"]],
-        q="Frokostmenu {}".format(week_pattern)
-    ).execute()
-    # Get all messages.
+    """Get emails from IMAP client from lunch bot label inbox and from a given week."""
     messages = []
-    if not "messages" in messages_results or not messages_results["messages"]:
-        return []
-    for message in messages_results["messages"]:
-        message = SERVICE.users().messages().get(
-            userId="me",
-            id=message["id"],
-            metadataHeaders=["body"]
-        ).execute()
+    imap.login(MAIL_USER, MAIL_PASS)
+    imap.select(EMAIL_LABEL)
+    earliest_weekday = get_earliest_weekday_date(week_datetime)
+    criterion = 'SINCE "{}"'.format(earliest_weekday.strftime("%d-%b-%Y"))
+    typ, data = imap.search("UTF-8", criterion)
+    for num in data[0].split():
+        typ, data = imap.fetch(num, '(RFC822)')
+        message = email.message_from_bytes(data[0][1], policy=policy.default)
         messages.append(message)
+    imap.close()
+    imap.logout()
+
     return messages
 
 
 def extract_email_body(message):
-    """Find html parts of the email, base64 decode the email body."""
-    html_parts = [part for part in message["payload"]["parts"] if part["mimeType"] == "text/html"]
-    email_body = base64.urlsafe_b64decode(html_parts[0]["body"]["data"])
+    """Find html parts of the email."""
+    email_body = ""
+    for part in message.walk():
+        if part.get_content_type() == 'text/html':
+            email_body = part.get_content()
+
     return email_body
 
 
@@ -178,14 +161,18 @@ def get_menu_output(day_datetime=datetime.now()):
     if not messages:
         raise LunchBotException("Lunch message could not be found")
     # Grab current weeks PDF menu link.
-    message = messages[0]
-    menu_link = extract_link_from_message(message, day_datetime)
+    for message in messages:
+        menu_link = extract_link_from_message(message, day_datetime)
+        if menu_link:
+            break
     if not menu_link:
         raise LunchBotException("Lunch menu link could not be found")
     # Extract the two text columns.
     text_columns = extract_pdf_text(menu_link)
     # Get the pdf indexes for the current weekday.
-    column_index, start_index, end_index = get_pdf_indexes(day_datetime.weekday())
+    column_index, start_index, end_index = get_pdf_indexes(
+        day_datetime.weekday()
+    )
     # Extract the weekday text separated by the indexes.
     regex_string = r"({}.*?){}".format(start_index, end_index)
     regex_object = re.compile(regex_string, re.DOTALL)

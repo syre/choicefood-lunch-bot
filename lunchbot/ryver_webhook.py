@@ -15,8 +15,7 @@ from utils import (
 from lunch_scraper import (
     get_menu_output,
     get_messages,
-    extract_email_time,
-    extract_link_from_message
+    extract_link_from_message,
 )
 from settings import RYVER_WEB_HOOK_POST_URL
 

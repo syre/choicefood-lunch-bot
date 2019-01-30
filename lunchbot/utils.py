@@ -31,14 +31,14 @@ def is_in_previous_hour(now_datetime, email_datetime):
 
 
 def add_formatting(output):
-    """Add some nice formatting to the message"""
+    """Add some nice formatting to the message."""
     output = re.sub(r"\n{1,}", "\n\n", output)
     output = re.sub(r" {2}", "&nbsp;", output)
     return output
 
 
 def remove_excessive_newlines(output):
-    """Replace sequences of more than one newlines with just one"""
+    """Replace sequences of more than one newlines with just one."""
     output = re.sub(r"\n{1,}", "\n", output)
     return output
 
@@ -46,3 +46,9 @@ def remove_excessive_newlines(output):
 def convert_unix_time_in_ms_to_datetime(unix_time_in_ms):
     """Convert unix time in ms to a datetime."""
     return datetime.fromtimestamp(int(unix_time_in_ms)/1000)
+
+
+def get_earliest_weekday_date(week_datetime):
+    weekday = week_datetime.weekday()
+    week_datetime -= timedelta(days=weekday)
+    return week_datetime.replace(hour=0, minute=0, second=0)
