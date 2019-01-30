@@ -12,13 +12,13 @@ import requests
 import bs4
 
 
-from exceptions import LunchBotException
-from utils import (
+from lunchbot.exceptions import LunchBotException
+from lunchbot.utils import (
     remove_excessive_newlines,
     get_earliest_weekday_date,
 )
 
-from settings import (
+from lunchbot.settings import (
     EMAIL_LABEL,
     EMAIL_IMAP_HOST,
     EMAIL_IMAP_PORT,

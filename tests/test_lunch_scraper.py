@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from datetime import datetime
-from lunch_scraper import (
+from lunchbot.lunch_scraper import (
     get_week_pattern,
 )
 

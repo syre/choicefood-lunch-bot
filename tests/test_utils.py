@@ -7,7 +7,7 @@ from datetime import (
 
 from pytz import timezone
 
-from utils import (
+from lunchbot.utils import (
     is_seven_o_clock_danish_time,
     is_in_previous_hour,
 )
