@@ -43,9 +43,9 @@ def remove_excessive_newlines(output):
     return output
 
 
-def convert_unix_time_in_ms_to_datetime(unix_time_in_ms):
-    """Convert unix time in ms to a datetime."""
-    return datetime.fromtimestamp(int(unix_time_in_ms)/1000)
+def convert_imap_date_to_datetime(date_str):
+    """Convert imap date format 'Mon, 28 Jan 2019 08:14:23 +0000' to datetime."""
+    return datetime.strptime(date_str, "%a, %d %b %Y %H:%M:%S %z")
 
 
 def get_earliest_weekday_date(week_datetime):

@@ -15,18 +15,18 @@ from datetime import datetime
 
 import requests
 
-from utils import (
+from lunchbot.utils import (
     is_in_previous_hour,
     is_seven_o_clock_danish_time,
     add_formatting,
-    convert_unix_time_in_ms_to_datetime
+    convert_imap_date_to_datetime,
 )
-from lunch_scraper import (
+from lunchbot.lunch_scraper import (
     get_menu_output,
     get_messages,
     extract_link_from_message
 )
-from settings import TEAMS_WEB_HOOK_POST_URL
+from lunchbot.settings import TEAMS_WEB_HOOK_POST_URL
 
 if __name__ == '__main__':
     now = datetime.now()
@@ -36,7 +36,7 @@ if __name__ == '__main__':
     # We assume there is only one message.
     message = messages[0]
     menu_link = extract_link_from_message(message, now)
-    email_time = convert_unix_time_in_ms_to_datetime(message["internalDate"])
+    email_time = convert_imap_date_to_datetime(message["Date"])
     send_message = (is_in_previous_hour(now, email_time) or
                     is_seven_o_clock_danish_time(now))
     output = get_menu_output()

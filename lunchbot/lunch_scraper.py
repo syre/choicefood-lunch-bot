@@ -24,9 +24,6 @@ from lunchbot.settings import (
     EMAIL_IMAP_PORT,
 )
 
-# Setup the IMAP client.
-imap = imaplib.IMAP4_SSL(EMAIL_IMAP_HOST, EMAIL_IMAP_PORT)
-
 MAIL_USER = os.environ.get("MAIL_USER")
 MAIL_PASS = os.environ.get("MAIL_PASS")
 
@@ -94,6 +91,7 @@ def extract_link_from_message(message, week_datetime):
 def get_messages(week_datetime):
     """Get emails from IMAP client from lunch bot label inbox and from a given week."""
     messages = []
+    imap = imaplib.IMAP4_SSL(EMAIL_IMAP_HOST, EMAIL_IMAP_PORT)
     imap.login(MAIL_USER, MAIL_PASS)
     imap.select(EMAIL_LABEL)
     earliest_weekday = get_earliest_weekday_date(week_datetime)

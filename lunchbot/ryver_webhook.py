@@ -6,18 +6,18 @@ from datetime import datetime
 
 import requests
 
-from utils import (
+from lunchbot.utils import (
     is_in_previous_hour,
     is_seven_o_clock_danish_time,
     add_formatting,
     convert_unix_time_in_ms_to_datetime,
 )
-from lunch_scraper import (
+from lunchbot.lunch_scraper import (
     get_menu_output,
     get_messages,
     extract_link_from_message,
 )
-from settings import RYVER_WEB_HOOK_POST_URL
+from lunchbot.settings import RYVER_WEB_HOOK_POST_URL
 
 if __name__ == '__main__':
     now = datetime.now()
