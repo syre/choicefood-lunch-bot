@@ -23,6 +23,7 @@ As the mighty chef Ronnie from Choicefood.dk only shares his menu with his most 
 1. get on the mailing list (good luck)
 2. label all incoming mail from email@choicefood.dk with a label name of your choice and set up a web hook in your chat client of choice
 3. input the web hook url, the email label name, the email imap host and port into the sample `settings.py` file
+4. set the environmental variables `MAIL_USER` and `MAIL_PASS` in the running environment corresponding to your IMAP username and password
 5. run `python -m lunchbot.lunch_scraper`
 6. ??
 7. profit!
