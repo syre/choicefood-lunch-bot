@@ -2,7 +2,7 @@ image: ubuntu
 
 stages:
   - test
-  - test_past
+  - test_future
 
 before_script:
   - apt-get update -y && apt-get install -y python python3 python-tox
@@ -11,7 +11,7 @@ run_tests_default:
   stage: test
   script: tox -e py36
 
-run_tests_py27:
-  stage: test_past
-  script: tox -e py27
+run_tests_py37:
+  stage: test_future
+  script: tox -e py37
   allow_failure: true
