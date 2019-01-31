@@ -24,6 +24,7 @@ from lunchbot.settings import (
     EMAIL_IMAP_PORT,
 )
 
+# Retrieve the IMAP username and password from environmental variables.
 MAIL_USER = os.environ.get("MAIL_USER")
 MAIL_PASS = os.environ.get("MAIL_PASS")
 
